@@ -20,6 +20,16 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
+## Uso
+
+Conforme al correo recibido se usaron las siguientes herramientas mencionadas en la entrevista, al ser multiples herramientas para un unico fin se eliguieron las de uso personal
+
+- se uso el framework nextjs de react
+- se uso TanStack Table antiguamente llamado react-table
+- se uso tailwind para los estilos
+- se uso fetch para el consumo de apis
+
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
