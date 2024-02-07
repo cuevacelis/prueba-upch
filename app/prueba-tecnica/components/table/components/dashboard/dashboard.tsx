@@ -453,7 +453,9 @@ export default function Dashboard({
                 {...register("gender", { required: true })}
               >
                 {LIST_INPUT_GENDER.map((gender: any) => (
-                  <option value={gender.toLowerCase()}>{gender}</option>
+                  <option key={gender} value={gender.toLowerCase()}>
+                    {gender}
+                  </option>
                 ))}
               </Form.Select>
             </Form.Group>
@@ -481,7 +483,9 @@ export default function Dashboard({
                 {...register("nat", { required: true })}
               >
                 {LIST_INPUT_COUNTRY.map((country: any) => (
-                  <option value={country.toUpperCase()}>{country}</option>
+                  <option key={country} value={country.toUpperCase()}>
+                    {country}
+                  </option>
                 ))}
               </Form.Select>
             </Form.Group>
