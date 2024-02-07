@@ -1,7 +1,9 @@
+import { Person } from "@/app/types/personType";
+import { Table } from "@tanstack/react-table";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 
-export default function Pagination({ table }: any) {
+export default function Pagination({ table }: { table: Table<Person> }) {
   return (
     <Row>
       <Col sm="12" md="5">
@@ -11,7 +13,7 @@ export default function Pagination({ table }: any) {
           role="status"
           aria-live="polite"
         >
-          #Registros: 10
+          #Registros: {table.getRowModel().rows.length}
         </div>
       </Col>
       <Col sm="12" md="7">
@@ -21,9 +23,13 @@ export default function Pagination({ table }: any) {
         >
           <ul className="pagination">
             <li
+              role={table.getCanPreviousPage() ? "button" : "dialog"}
               className="paginate_button page-item previous disabled"
               id="example_previous"
-              onClick={() => table.previousPage()}
+              onClick={() => {
+                table.getCanPreviousPage() &&
+                  (table.previousPage(), table.resetRowSelection());
+              }}
             >
               <a
                 aria-controls="example"
@@ -49,9 +55,13 @@ export default function Pagination({ table }: any) {
               </a>
             </li>
             <li
+              role="button"
               className="paginate_button page-item next disabled"
               id="example_next"
-              onClick={() => table.nextPage()}
+              onClick={() => {
+                table.nextPage();
+                table.resetRowSelection();
+              }}
             >
               <a
                 aria-controls="example"

@@ -1,5 +1,6 @@
 "use client";
 
+import { SearchType } from "@/app/types/searchType";
 import { useEffect, useState } from "react";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
@@ -9,11 +10,7 @@ export default function Search({
   onChange,
   debounce = 500,
   ...props
-}: {
-  value: string | number;
-  onChange: (value: string | number) => void;
-  debounce?: number;
-} & Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange">) {
+}: SearchType) {
   const [value, setValue] = useState(initialValue);
 
   useEffect(() => {

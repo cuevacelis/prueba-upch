@@ -2,7 +2,7 @@
 import Container from "react-bootstrap/Container";
 import Navbar from "react-bootstrap/Navbar";
 
-export default function NavComponent() {
+export default function Nav() {
   return (
     <Navbar bg="dark" expand="lg" data-bs-theme="dark">
       <Container fluid>

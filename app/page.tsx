@@ -1,8 +1,10 @@
-import MyTable from "./prueba-tecnica/myTable";
+import Nav from "./components/nav/nav";
+import MyTable from "./components/table/myTable";
 
-export default function Home() {
+export default function HomePage() {
   return (
     <main>
+      <Nav />
       <MyTable />
     </main>
   );

@@ -20,8 +20,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <link rel="preconnect" href="https://fonts.googleapis.com"></link>
-      <link rel="preconnect" href="https://fonts.gstatic.com"></link>
       <body className={montserrat.variable}>{children}</body>
     </html>
   );

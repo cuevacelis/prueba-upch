@@ -16,106 +16,32 @@ import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Table from "react-bootstrap/Table";
+import { LIST_INPUT_COUNTRY } from "../../lib/listInputCountry";
+import { LIST_INPUT_GENDER } from "../../lib/listInputGender";
+import { Person, PersonFetch } from "../../types/personType";
 import Dashboard from "./components/dashboard/dashboard";
 import Pagination from "./components/pagination/pagination";
 import Search from "./components/search/search";
 
-type Person = {
-  gender: string;
-  name: Name;
-  location: Location;
-  email: string;
-  login: Login;
-  dob: Dob;
-  registered: Registered;
-  phone: string;
-  cell: string;
-  id: Id;
-  picture: Picture;
-  nat: string;
-};
-
-export interface Name {
-  title: string;
-  first: string;
-  last: string;
-}
-
-export interface Location {
-  street: Street;
-  city: string;
-  state: string;
-  country: string;
-  postcode: number;
-  coordinates: Coordinates;
-  timezone: Timezone;
-}
-
-export interface Street {
-  number: number;
-  name: string;
-}
-
-export interface Coordinates {
-  latitude: string;
-  longitude: string;
-}
-
-export interface Timezone {
-  offset: string;
-  description: string;
-}
-
-export interface Login {
-  uuid: string;
-  username: string;
-  password: string;
-  salt: string;
-  md5: string;
-  sha1: string;
-  sha256: string;
-}
-
-export interface Dob {
-  date: string;
-  age: number;
-}
-
-export interface Registered {
-  date: string;
-  age: number;
-}
-
-export interface Id {
-  name: string;
-  value: string;
-}
-
-export interface Picture {
-  large: string;
-  medium: string;
-  thumbnail: string;
-}
-
-const LIST_INPUT_GENDER = ["FEMALE", "MALE"];
-
-const LIST_INPUT_COUNTRY = ["US", "AU", "BR", "CH"];
-
-export default function TableComponent() {
-  const [dataFetch, setDataFetch] = useState<any>([]);
+export default function MyTable() {
+  const [dataFetch, setDataFetch] = useState<PersonFetch>({});
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState({});
-  const [globalFilter, setGlobalFilter] = useState("");
-  const [filterGender, setFilterGender] = useState("");
-  const [filterCountry, setFilterCountry] = useState("");
+  const [globalFilter, setGlobalFilter] = useState<string>("");
+  const [filterGender, setFilterGender] = useState<string>("");
+  const [filterCountry, setFilterCountry] = useState<string>("");
   const [showResultFilterGender, setShowResultFilterGender] =
     useState(LIST_INPUT_GENDER);
   const [showResultFilterCountry, setShowResultFilterCountry] =
     useState(LIST_INPUT_COUNTRY);
-  const [selectPrevGender, setSelectPrevGender] = useState("FEMALE");
-  const [selectPrevCountry, setSelectPrevCountry] = useState("US");
-  const [selectGender, setSelectGender] = useState("FEMALE");
-  const [selectCountry, setSelectCountry] = useState("US");
+  const [selectPrevGender, setSelectPrevGender] =
+    useState<(typeof showResultFilterGender)[0]>("FEMALE");
+  const [selectPrevCountry, setSelectPrevCountry] =
+    useState<(typeof showResultFilterCountry)[0]>("US");
+  const [selectGender, setSelectGender] =
+    useState<(typeof showResultFilterGender)[0]>("FEMALE");
+  const [selectCountry, setSelectCountry] =
+    useState<(typeof showResultFilterCountry)[0]>("US");
   const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
@@ -133,7 +59,7 @@ export default function TableComponent() {
     gender = selectGender,
     country = selectCountry,
     page = pagination.pageIndex,
-  }: any) => {
+  }) => {
     try {
       const responseDataFetch = await fetch(
         `https://randomuser.me/api?results=10&gender=${gender.toLowerCase()}&nat=${country}&page=${page}`,
@@ -149,24 +75,11 @@ export default function TableComponent() {
         throw "Respuesta de red OK pero respuesta HTTP no OK";
       }
       const dataJson = await responseDataFetch.json();
-      // console.log(dataJson);
       setDataFetch(dataJson);
     } catch (error) {
       console.error(error);
     }
   };
-
-  // useEffect(function getFirstFetching() {
-  //   getFetching({ page: 1 });
-  // }, []);
-
-  useEffect(
-    function handlePagination() {
-      getFetching({ page: pagination.pageIndex });
-      setGlobalFilter("");
-    },
-    [pagination]
-  );
 
   const columns = useMemo<ColumnDef<Person>[]>(
     () => [
@@ -179,7 +92,6 @@ export default function TableComponent() {
             type="checkbox"
             {...{
               checked: table.getIsAllRowsSelected(),
-              // indeterminate: table.getIsSomeRowsSelected(),
               onChange: table.getToggleAllRowsSelectedHandler(),
             }}
           />
@@ -192,7 +104,6 @@ export default function TableComponent() {
             {...{
               checked: row.getIsSelected(),
               disabled: !row.getCanSelect(),
-              // indeterminate: row.getIsSomeSelected(),
               onChange: row.getToggleSelectedHandler(),
             }}
           />
@@ -253,7 +164,13 @@ export default function TableComponent() {
     onGlobalFilterChange: setGlobalFilter,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
-    onPaginationChange: setPagination,
+    onPaginationChange: (updater) => {
+      if (typeof updater !== "function") return;
+      const newPageInfo = updater(table.getState().pagination);
+      setPagination(updater);
+      getFetching({ page: newPageInfo.pageIndex + 1 });
+      setGlobalFilter("");
+    },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -261,6 +178,10 @@ export default function TableComponent() {
     manualPagination: true,
     debugTable: false,
   });
+
+  useEffect(function getFirstFetching() {
+    getFetching({ page: 1 });
+  }, []);
 
   return (
     <Container className="pt-5">
@@ -280,12 +201,8 @@ export default function TableComponent() {
             setSelectPrevCountry,
             selectPrevGender,
             setSelectPrevGender,
-            selectCountry,
             setSelectCountry,
-            selectGender,
             setSelectGender,
-            LIST_INPUT_GENDER,
-            LIST_INPUT_COUNTRY,
             showResultFilterGender,
             setShowResultFilterGender,
             showResultFilterCountry,

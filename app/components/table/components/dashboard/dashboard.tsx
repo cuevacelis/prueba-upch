@@ -1,4 +1,7 @@
 "use client";
+import { LIST_INPUT_COUNTRY } from "@/app/lib/listInputCountry";
+import { LIST_INPUT_GENDER } from "@/app/lib/listInputGender";
+import { DashboardInterface } from "@/app/types/dashboardType";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 import Button from "react-bootstrap/Button";
@@ -12,10 +15,6 @@ import withReactContent from "sweetalert2-react-content";
 import { useOnClickOutside } from "usehooks-ts";
 
 const MySwal = withReactContent(Swal);
-
-const LIST_INPUT_GENDER = ["FEMALE", "MALE"];
-
-const LIST_INPUT_COUNTRY = ["US", "AU", "BR", "CH"];
 
 export default function Dashboard({
   dataFetch,
@@ -31,17 +30,13 @@ export default function Dashboard({
   setSelectPrevCountry,
   selectPrevGender,
   setSelectPrevGender,
-  selectCountry,
   setSelectCountry,
-  selectGender,
   setSelectGender,
-  LIST_INPUT_GENDER,
-  LIST_INPUT_COUNTRY,
   showResultFilterGender,
   setShowResultFilterGender,
   showResultFilterCountry,
   setShowResultFilterCountry,
-}: any) {
+}: DashboardInterface) {
   const {
     register,
     handleSubmit,
@@ -58,7 +53,7 @@ export default function Dashboard({
   let positionSelected = Object.getOwnPropertyNames(
     table.getState().rowSelection
   );
-  const rowsSelected = positionSelected.map((e: any) => dataFetch?.results[e]);
+  const rowsSelected = table.getSelectedRowModel().rows;
 
   useEffect(() => {
     reset();
@@ -163,7 +158,7 @@ export default function Dashboard({
         confirmButtonText: "¡Sí, eliminar!",
       }).then((result) => {
         if (result.isConfirmed) {
-          const newDataResults = dataFetch?.results.filter(
+          const newDataResults = dataFetch?.results?.filter(
             (e: any, index: number) => {
               if (!positionSelected.includes(String(index))) {
                 return e;
@@ -183,16 +178,10 @@ export default function Dashboard({
         }
       });
     }
-
-    // if(){
-    //   const positionSelectedDeleted=Object.getOwnPropertyNames(table.getState().rowSelection)
-    //   a.filter((e:any,index:number)=>index===Number(positionSelectedDeleted))
-    //   setData()
-    // }
   };
 
   const onSubmit: SubmitHandler<any> = (data) => {
-    const newDataResults = dataFetch?.results.map((e: any, index: number) => {
+    const newDataResults = dataFetch?.results?.map((e: any, index: number) => {
       if (index === Number(positionSelected[0])) {
         return {
           ...e,
@@ -411,6 +400,7 @@ export default function Dashboard({
                       });
                       setGlobalFilter("");
                       table.resetPageIndex(true);
+                      table.resetRowSelection();
                     }}
                   >
                     <i className="bi bi-search me-2"></i> Buscar
@@ -432,7 +422,7 @@ export default function Dashboard({
               <Form.Label>Nombre</Form.Label>
               <Form.Control
                 type="text"
-                defaultValue={rowsSelected[0]?.name?.first}
+                defaultValue={rowsSelected[0]?.original.name?.first}
                 {...register("first", { required: true })}
                 autoFocus
               />
@@ -441,7 +431,7 @@ export default function Dashboard({
               <Form.Label>Apellido</Form.Label>
               <Form.Control
                 type="text"
-                defaultValue={rowsSelected[0]?.name.last}
+                defaultValue={rowsSelected[0]?.original.name.last}
                 {...register("last", { required: true })}
               />
             </Form.Group>
@@ -449,7 +439,7 @@ export default function Dashboard({
               <Form.Label>Genero</Form.Label>
               <Form.Select
                 aria-label="genero"
-                defaultValue={rowsSelected[0]?.gender}
+                defaultValue={rowsSelected[0]?.original.gender}
                 {...register("gender", { required: true })}
               >
                 {LIST_INPUT_GENDER.map((gender: any) => (
@@ -463,7 +453,7 @@ export default function Dashboard({
               <Form.Label>Correo electronico</Form.Label>
               <Form.Control
                 type="email"
-                defaultValue={rowsSelected[0]?.email}
+                defaultValue={rowsSelected[0]?.original.email}
                 {...register("email", { required: true })}
               />
             </Form.Group>
@@ -471,7 +461,7 @@ export default function Dashboard({
               <Form.Label>Celular</Form.Label>
               <Form.Control
                 type="text"
-                defaultValue={rowsSelected[0]?.phone}
+                defaultValue={rowsSelected[0]?.original.phone}
                 {...register("phone", { required: true })}
               />
             </Form.Group>
@@ -479,7 +469,7 @@ export default function Dashboard({
               <Form.Label>Nacionalidad</Form.Label>
               <Form.Select
                 aria-label="nacionalidad"
-                defaultValue={rowsSelected[0]?.nat}
+                defaultValue={rowsSelected[0]?.original.nat}
                 {...register("nat", { required: true })}
               >
                 {LIST_INPUT_COUNTRY.map((country: any) => (
