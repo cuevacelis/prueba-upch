@@ -12,6 +12,7 @@ import {
 } from "@tanstack/react-table";
 import clsx from "clsx";
 import { useEffect, useMemo, useState } from "react";
+import { Spinner } from "react-bootstrap";
 import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
@@ -25,6 +26,7 @@ import Search from "./components/search/search";
 
 export default function MyTable() {
   const [dataFetch, setDataFetch] = useState<PersonFetch>({});
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState({});
   const [globalFilter, setGlobalFilter] = useState<string>("");
@@ -61,6 +63,7 @@ export default function MyTable() {
     page = pagination.pageIndex,
   }) => {
     try {
+      setIsLoading(true);
       const responseDataFetch = await fetch(
         `https://randomuser.me/api?results=10&gender=${gender.toLowerCase()}&nat=${country}&page=${page}`,
         {
@@ -76,7 +79,9 @@ export default function MyTable() {
       }
       const dataJson = await responseDataFetch.json();
       setDataFetch(dataJson);
+      setIsLoading(false);
     } catch (error) {
+      setIsLoading(false);
       console.error(error);
     }
   };
@@ -220,151 +225,78 @@ export default function MyTable() {
             />
             <Row className="dt-row">
               <Col sm="12">
-                <Table
-                  responsive
-                  hover
-                  className="table-light dataTable no-footer"
-                >
-                  <thead>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                      <tr key={headerGroup.id}>
-                        {headerGroup.headers.map((header) => {
+                {isLoading ? (
+                  <div
+                    className="text-center"
+                    style={{ marginTop: "50px", overflowY: "hidden" }}
+                  >
+                    <Spinner animation="border" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </Spinner>
+                  </div>
+                ) : (
+                  <Table
+                    responsive
+                    hover
+                    className="table-light dataTable no-footer"
+                  >
+                    <thead>
+                      {table.getHeaderGroups().map((headerGroup) => (
+                        <tr key={headerGroup.id}>
+                          {headerGroup.headers.map((header) => {
+                            return (
+                              <th
+                                key={header.id}
+                                colSpan={header.colSpan}
+                                tabIndex={0}
+                                scope="col"
+                                className={clsx("sorting", {
+                                  ["sorting_asc"]:
+                                    header.column.getIsSorted() === "asc",
+                                  ["sorting_desc"]:
+                                    header.column.getIsSorted() === "desc",
+                                })}
+                                aria-controls="example"
+                                rowSpan={1}
+                                onClick={header.column.getToggleSortingHandler()}
+                              >
+                                {header.isPlaceholder ? null : (
+                                  <span>
+                                    {flexRender(
+                                      header.column.columnDef.header,
+                                      header.getContext()
+                                    )}
+                                  </span>
+                                )}
+                              </th>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </thead>
+                    <tbody>
+                      {table
+                        .getRowModel()
+                        .rows.slice(0, 10)
+                        .map((row) => {
                           return (
-                            <th
-                              key={header.id}
-                              colSpan={header.colSpan}
-                              tabIndex={0}
-                              scope="col"
-                              className={clsx("sorting", {
-                                ["sorting_asc"]:
-                                  header.column.getIsSorted() === "asc",
-                                ["sorting_desc"]:
-                                  header.column.getIsSorted() === "desc",
+                            <tr key={row.id}>
+                              {row.getVisibleCells().map((cell) => {
+                                return (
+                                  <td key={cell.id}>
+                                    {flexRender(
+                                      cell.column.columnDef.cell,
+                                      cell.getContext()
+                                    )}
+                                  </td>
+                                );
                               })}
-                              aria-controls="example"
-                              rowSpan={1}
-                              onClick={header.column.getToggleSortingHandler()}
-                            >
-                              {header.isPlaceholder ? null : (
-                                <span
-                                // {...{
-                                //   className: header.column.getCanSort()
-                                //     ? "cursor-pointer select-none"
-                                //     : "",
-                                //   onClick:
-                                //     header.column.getToggleSortingHandler(),
-                                // }}
-                                >
-                                  {flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext()
-                                  )}
-                                </span>
-                              )}
-                            </th>
+                            </tr>
                           );
                         })}
-                      </tr>
-                    ))}
-
-                    {/* <tr>
-                      <th
-                        scope="col"
-                        className="sorting sorting_asc"
-                        tabIndex={0}
-                        aria-controls="example"
-                        rowSpan={1}
-                        colSpan={1}
-                        aria-label=": activate to sort column descending"
-                        style={{ width: "13px" }}
-                        aria-sort="ascending"
-                      >
-                        <i className="bi bi-check-lg"></i>
-                      </th>
-                      <th
-                        scope="col"
-                        className="sorting"
-                        tabIndex={0}
-                        aria-controls="example"
-                        rowSpan={1}
-                        colSpan={1}
-                        aria-label="Nombre: activate to sort column ascending"
-                        style={{ width: "60.8281px" }}
-                      >
-                        Nombre
-                      </th>
-                      <th
-                        scope="col"
-                        className="sorting"
-                        tabIndex={0}
-                        aria-controls="example"
-                        rowSpan={1}
-                        colSpan={1}
-                        aria-label="Genero: activate to sort column ascending"
-                        style={{ width: "48.6719px" }}
-                      >
-                        Genero
-                      </th>
-                      <th
-                        scope="col"
-                        className="sorting"
-                        tabIndex={0}
-                        aria-controls="example"
-                        rowSpan={1}
-                        colSpan={1}
-                        aria-label="Correo electrónico: activate to sort column ascending"
-                        style={{ width: "138.609px" }}
-                      >
-                        Correo electrónico
-                      </th>
-                      <th
-                        scope="col"
-                        className="sorting"
-                        tabIndex={0}
-                        aria-controls="example"
-                        rowSpan={1}
-                        colSpan={1}
-                        aria-label="Celular: activate to sort column ascending"
-                        style={{ width: "54.9375px" }}
-                      >
-                        Celular
-                      </th>
-                      <th
-                        scope="col"
-                        className="sorting"
-                        tabIndex={0}
-                        aria-controls="example"
-                        rowSpan={1}
-                        colSpan={1}
-                        aria-label="Nacionalidad: activate to sort column ascending"
-                        style={{ width: "86.9531px" }}
-                      >
-                        Nacionalidad
-                      </th>
-                    </tr> */}
-                  </thead>
-                  <tbody>
-                    {table
-                      .getRowModel()
-                      .rows.slice(0, 10)
-                      .map((row) => {
-                        return (
-                          <tr key={row.id}>
-                            {row.getVisibleCells().map((cell) => {
-                              return (
-                                <td key={cell.id}>
-                                  {flexRender(
-                                    cell.column.columnDef.cell,
-                                    cell.getContext()
-                                  )}
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        );
-                      })}
-                  </tbody>
-                </Table>
+                    </tbody>
+                  </Table>
+                )}
               </Col>
             </Row>
             <Pagination table={table} />
