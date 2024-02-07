@@ -18,6 +18,9 @@
     "react-bootstrap": "^2.10.0",
     "react-bootstrap-icons": "^1.10.3",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.50.1",
+    "sweetalert2": "^11.10.5",
+    "sweetalert2-react-content": "^5.0.7",
     "usehooks-ts": "^2.12.1"
   },
   "devDependencies": {

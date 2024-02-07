@@ -173,7 +173,6 @@ export default function TableComponent() {
       {
         id: "select",
         accessorKey: "",
-        // header: () => <i className="bi bi-check-lg"></i>,
         header: ({ table }) => (
           <input
             className="form-check-input"
@@ -268,6 +267,8 @@ export default function TableComponent() {
       <Row>
         <Dashboard
           {...{
+            dataFetch,
+            setDataFetch,
             table,
             setGlobalFilter,
             getFetching,
@@ -445,146 +446,6 @@ export default function TableComponent() {
                           </tr>
                         );
                       })}
-                    {/* <tr className="odd">
-                      <th scope="row" className="sorting_1">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          value=""
-                        />
-                      </th>
-                      <td>Lesa Collins</td>
-                      <td>Female</td>
-                      <td>example@gmail.com</td>
-                      <td>527 567 368</td>
-                      <td>US</td>
-                    </tr>
-                    <tr className="even">
-                      <th scope="row" className="sorting_1">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          value=""
-                        />
-                      </th>
-                      <td>Lesa Collins</td>
-                      <td>Female</td>
-                      <td>example@gmail.com</td>
-                      <td>527 567 368</td>
-                      <td>US</td>
-                    </tr>
-                    <tr className="odd">
-                      <th scope="row" className="sorting_1">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          value=""
-                        />
-                      </th>
-                      <td>Lesa Collins</td>
-                      <td>Female</td>
-                      <td>example@gmail.com</td>
-                      <td>527 567 368</td>
-                      <td>US</td>
-                    </tr>
-                    <tr className="even">
-                      <th scope="row" className="sorting_1">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          value=""
-                        />
-                      </th>
-                      <td>Lesa Collins</td>
-                      <td>Female</td>
-                      <td>example@gmail.com</td>
-                      <td>527 567 368</td>
-                      <td>US</td>
-                    </tr>
-                    <tr className="odd">
-                      <th scope="row" className="sorting_1">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          value=""
-                        />
-                      </th>
-                      <td>Lesa Collins</td>
-                      <td>Female</td>
-                      <td>example@gmail.com</td>
-                      <td>527 567 368</td>
-                      <td>US</td>
-                    </tr>
-                    <tr className="even">
-                      <th scope="row" className="sorting_1">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          value=""
-                        />
-                      </th>
-                      <td>Lesa Collins</td>
-                      <td>Female</td>
-                      <td>example@gmail.com</td>
-                      <td>527 567 368</td>
-                      <td>US</td>
-                    </tr>
-                    <tr className="odd">
-                      <th scope="row" className="sorting_1">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          value=""
-                        />
-                      </th>
-                      <td>Lesa Collins</td>
-                      <td>Female</td>
-                      <td>example@gmail.com</td>
-                      <td>527 567 368</td>
-                      <td>US</td>
-                    </tr>
-                    <tr className="even">
-                      <th scope="row" className="sorting_1">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          value=""
-                        />
-                      </th>
-                      <td>Lesa Collins</td>
-                      <td>Female</td>
-                      <td>example@gmail.com</td>
-                      <td>527 567 368</td>
-                      <td>US</td>
-                    </tr>
-                    <tr className="odd">
-                      <th scope="row" className="sorting_1">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          value=""
-                        />
-                      </th>
-                      <td>Lesa Collins</td>
-                      <td>Female</td>
-                      <td>example@gmail.com</td>
-                      <td>527 567 368</td>
-                      <td>US</td>
-                    </tr>
-                    <tr className="even">
-                      <th scope="row" className="sorting_1">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          value=""
-                        />
-                      </th>
-                      <td>Lesa Collins</td>
-                      <td>Female</td>
-                      <td>example@gmail.com</td>
-                      <td>527 567 368</td>
-                      <td>US</td>
-                    </tr> */}
                   </tbody>
                 </Table>
               </Col>

@@ -1,12 +1,25 @@
 "use client";
 import clsx from "clsx";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
+import Modal from "react-bootstrap/Modal";
+import { SubmitHandler, useForm } from "react-hook-form";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 import { useOnClickOutside } from "usehooks-ts";
 
+const MySwal = withReactContent(Swal);
+
+const LIST_INPUT_GENDER = ["FEMALE", "MALE"];
+
+const LIST_INPUT_COUNTRY = ["US", "AU", "BR", "CH"];
+
 export default function Dashboard({
+  dataFetch,
+  setDataFetch,
   table,
   setGlobalFilter,
   getFetching,
@@ -29,17 +42,40 @@ export default function Dashboard({
   showResultFilterCountry,
   setShowResultFilterCountry,
 }: any) {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm();
   const [isShowFilterSection, setIsShowFilterSection] = useState(false);
   const [isOpenGenderInput, setIsOpenGenderInput] = useState<boolean>(false);
   const [isOpenCountryInput, setIsOpenCountryInput] = useState<boolean>(false);
+  const [showModal, setShowModal] = useState(false);
   const refGenderInput = useRef<null | HTMLDivElement>(null);
   const refCountryInput = useRef<null | HTMLDivElement>(null);
+
+  let positionSelected = Object.getOwnPropertyNames(
+    table.getState().rowSelection
+  );
+  const rowsSelected = positionSelected.map((e: any) => dataFetch?.results[e]);
+
+  useEffect(() => {
+    reset();
+  }, [table.getState().rowSelection]);
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    reset();
+  };
+  const handleShowModal = () => setShowModal(true);
 
   useOnClickOutside(refGenderInput, () => {
     if (isOpenGenderInput) {
       setIsOpenGenderInput(false);
     }
   });
+
   useOnClickOutside(refCountryInput, () => {
     if (isOpenCountryInput) {
       setIsOpenCountryInput(false);
@@ -80,6 +116,105 @@ export default function Dashboard({
     );
   };
 
+  const handleEditRowTable = () => {
+    const countRowsSelect = Object.keys(table.getState().rowSelection).length;
+    if (countRowsSelect === 0) {
+      MySwal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "info",
+        title: "Debes seleccionar una fila",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    } else if (countRowsSelect > 1) {
+      MySwal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "info",
+        title: "Seleccionaste más de una fila, selecciona solo una",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    } else {
+      handleShowModal();
+    }
+  };
+
+  const handleDeleteRowsTable = () => {
+    const countRowsSelect = Object.keys(table.getState().rowSelection).length;
+    if (countRowsSelect === 0) {
+      MySwal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "info",
+        title: "Debes seleccionar almenos una fila.",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    } else {
+      MySwal.fire({
+        title: "¿Estas seguro?",
+        text: "¡No podrás revertir esto!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "¡Sí, eliminar!",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const newDataResults = dataFetch?.results.filter(
+            (e: any, index: number) => {
+              if (!positionSelected.includes(String(index))) {
+                return e;
+              }
+            }
+          );
+          setDataFetch((prev: any) => ({
+            info: prev.info,
+            results: newDataResults,
+          }));
+          table.resetRowSelection();
+          Swal.fire({
+            title: "¡Eliminado!",
+            text: "La fila fue eliminada.",
+            icon: "success",
+          });
+        }
+      });
+    }
+
+    // if(){
+    //   const positionSelectedDeleted=Object.getOwnPropertyNames(table.getState().rowSelection)
+    //   a.filter((e:any,index:number)=>index===Number(positionSelectedDeleted))
+    //   setData()
+    // }
+  };
+
+  const onSubmit: SubmitHandler<any> = (data) => {
+    const newDataResults = dataFetch?.results.map((e: any, index: number) => {
+      if (index === Number(positionSelected[0])) {
+        return {
+          ...e,
+          name: {
+            ...e.name,
+            first: data.first,
+            last: data.last,
+          },
+          gender: data.gender,
+          email: data.email,
+          phone: data.phone,
+          nat: data.nat,
+        };
+      } else {
+        return e;
+      }
+    });
+    setDataFetch((prev: any) => ({ info: prev.info, results: newDataResults }));
+    setShowModal(false);
+    // reset();
+  };
+
   return (
     <>
       <Col sm="12" md="6">
@@ -99,10 +234,16 @@ export default function Dashboard({
           >
             <i className="bi bi-sliders"></i> Filtros
           </button>
-          <button className="btn btn-sm btn-outline-primary px-4 me-2">
+          <button
+            className="btn btn-sm btn-outline-primary px-4 me-2"
+            onClick={handleEditRowTable}
+          >
             <i className="bi bi-pencil"></i> Editar
           </button>
-          <button className="btn btn-sm btn-outline-danger px-4 me-2">
+          <button
+            className="btn btn-sm btn-outline-danger px-4 me-2"
+            onClick={handleDeleteRowsTable}
+          >
             <i className="bi bi-trash3"></i> Eliminar
           </button>
         </div>
@@ -280,6 +421,81 @@ export default function Dashboard({
           </Card>
         </Col>
       )}
+
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Editar</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleSubmit(onSubmit)}>
+            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+              <Form.Label>Nombre</Form.Label>
+              <Form.Control
+                type="text"
+                defaultValue={rowsSelected[0]?.name?.first}
+                {...register("first", { required: true })}
+                autoFocus
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+              <Form.Label>Apellido</Form.Label>
+              <Form.Control
+                type="text"
+                defaultValue={rowsSelected[0]?.name.last}
+                {...register("last", { required: true })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+              <Form.Label>Genero</Form.Label>
+              <Form.Select
+                aria-label="genero"
+                defaultValue={rowsSelected[0]?.gender}
+                {...register("gender", { required: true })}
+              >
+                {LIST_INPUT_GENDER.map((gender: any) => (
+                  <option value={gender.toLowerCase()}>{gender}</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+              <Form.Label>Correo electronico</Form.Label>
+              <Form.Control
+                type="email"
+                defaultValue={rowsSelected[0]?.email}
+                {...register("email", { required: true })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+              <Form.Label>Celular</Form.Label>
+              <Form.Control
+                type="text"
+                defaultValue={rowsSelected[0]?.phone}
+                {...register("phone", { required: true })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+              <Form.Label>Nacionalidad</Form.Label>
+              <Form.Select
+                aria-label="nacionalidad"
+                defaultValue={rowsSelected[0]?.nat}
+                {...register("nat", { required: true })}
+              >
+                {LIST_INPUT_COUNTRY.map((country: any) => (
+                  <option value={country.toUpperCase()}>{country}</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleCloseModal}>
+                Cerrar
+              </Button>
+              <Button variant="primary" type="submit">
+                Guardar
+              </Button>
+            </Modal.Footer>
+          </Form>
+        </Modal.Body>
+      </Modal>
     </>
   );
 }
