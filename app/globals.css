@@ -1,3 +1,9 @@
+
+@import url("bootstrap/dist/css/bootstrap.min.css");
+@import url("bootstrap-icons/font/bootstrap-icons.css");
+@import url("./twitter-bootstrap.css");
+@import url("./dataTables.css");
+
 body {
   background-color: #f5f6f6;
   font-family: var(--font-montserrat), sans-serif;
@@ -237,7 +243,3 @@ input[type="search"]:focus {
   display: flex;
   align-items: center;
 }
-@import url("bootstrap/dist/css/bootstrap.min.css");
-@import url("bootstrap-icons/font/bootstrap-icons.css");
-@import url("./twitter-bootstrap.css");
-@import url("./dataTables.css");
