@@ -47,8 +47,8 @@ export default function Dashboard({
   const [isOpenGenderInput, setIsOpenGenderInput] = useState<boolean>(false);
   const [isOpenCountryInput, setIsOpenCountryInput] = useState<boolean>(false);
   const [showModal, setShowModal] = useState(false);
-  const refGenderInput = useRef<null | HTMLDivElement>(null);
-  const refCountryInput = useRef<null | HTMLDivElement>(null);
+  const refGenderInput = useRef<HTMLElement>(null);
+  const refCountryInput = useRef<HTMLElement>(null);
 
   let positionSelected = Object.getOwnPropertyNames(
     table.getState().rowSelection
@@ -64,18 +64,6 @@ export default function Dashboard({
     reset();
   };
   const handleShowModal = () => setShowModal(true);
-
-  useOnClickOutside(refGenderInput, () => {
-    if (isOpenGenderInput) {
-      setIsOpenGenderInput(false);
-    }
-  });
-
-  useOnClickOutside(refCountryInput, () => {
-    if (isOpenCountryInput) {
-      setIsOpenCountryInput(false);
-    }
-  });
 
   const handleChangeInputGender = (e: any) => {
     const currentFilterGender = e.target.value;
@@ -268,7 +256,6 @@ export default function Dashboard({
                       </a>
                       {isOpenGenderInput && (
                         <div
-                          ref={refGenderInput}
                           className="dropdown-menu mt-1 show"
                         >
                           <div className="d-flex flex-column px-2 pb-2 border-bottom">
@@ -340,7 +327,6 @@ export default function Dashboard({
                       </a>
                       {isOpenCountryInput && (
                         <div
-                          ref={refCountryInput}
                           className="dropdown-menu mt-1 show"
                         >
                           <div className="d-flex flex-column px-2 pb-2 border-bottom">
