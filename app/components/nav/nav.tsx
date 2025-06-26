@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import Link from "next/link"
 
 export default function Nav() {
   return (
@@ -9,7 +10,7 @@ export default function Nav() {
         <div className="flex items-center justify-between h-16">
           {/* Logo centrado */}
           <div className="flex-1 flex justify-center">
-            <a href="/" className="flex items-center">
+            <Link href="/" className="flex items-center">
               <Image
                 src="https://logo.clearbit.com/clearbit.com"
                 alt="Logo de la empresa"
@@ -17,7 +18,7 @@ export default function Nav() {
                 width={30}
                 height={30}
               />
-            </a>
+            </Link>
           </div>
 
           {/* Toggle button para móvil (opcional) */}
