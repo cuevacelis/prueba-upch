@@ -1,48 +1,20 @@
-"use client";
+"use client"
 
-import { SearchType } from "@/app/types/searchType";
-import { useEffect, useState } from "react";
-import Col from "react-bootstrap/Col";
-import Row from "react-bootstrap/Row";
+import { Input } from "@/components/ui/input"
+import { SearchIcon } from "lucide-react"
 
-export default function Search({
-  value: initialValue,
-  onChange,
-  debounce = 500,
-  ...props
-}: SearchType) {
-  const [value, setValue] = useState(initialValue);
+interface SearchProps {
+  value: string
+  onChange: (value: string) => void
+}
 
-  useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      onChange(value);
-    }, debounce);
-
-    return () => clearTimeout(timeout);
-  }, [value]);
-
+export default function Search({ value, onChange }: SearchProps) {
   return (
-    <Row xs={2} md={4} lg={6}>
-      <Col sm="12">
-        <div id="example_filter" className="dataTables_filter">
-          <label>
-            Buscar:
-            <input
-              {...props}
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              type="search"
-              className="form-control form-control-sm"
-              placeholder="Buscar"
-              aria-controls="example"
-            />
-          </label>
-        </div>
-      </Col>
-    </Row>
-  );
+    <div className="flex items-center space-x-2">
+      <div className="relative flex-1 max-w-sm">
+        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input placeholder="Buscar..." value={value} onChange={(e) => onChange(e.target.value)} className="pl-10" />
+      </div>
+    </div>
+  )
 }

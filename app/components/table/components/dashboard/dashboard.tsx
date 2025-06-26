@@ -1,20 +1,26 @@
-"use client";
-import { LIST_INPUT_COUNTRY } from "@/app/lib/listInputCountry";
-import { LIST_INPUT_GENDER } from "@/app/lib/listInputGender";
-import { DashboardInterface } from "@/app/types/dashboardType";
-import clsx from "clsx";
-import { useEffect, useRef, useState } from "react";
-import Button from "react-bootstrap/Button";
-import Card from "react-bootstrap/Card";
-import Col from "react-bootstrap/Col";
-import Form from "react-bootstrap/Form";
-import Modal from "react-bootstrap/Modal";
-import { SubmitHandler, useForm } from "react-hook-form";
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
-import { useOnClickOutside } from "usehooks-ts";
+"use client"
 
-const MySwal = withReactContent(Swal);
+import type React from "react"
+
+import { LIST_INPUT_COUNTRY } from "@/app/lib/listInputCountry"
+import { LIST_INPUT_GENDER } from "@/app/lib/listInputGender"
+import type { DashboardInterface } from "@/app/types/dashboardType"
+import { useEffect, useRef, useState } from "react"
+import { type SubmitHandler, useForm } from "react-hook-form"
+import Swal from "sweetalert2"
+import withReactContent from "sweetalert2-react-content"
+import { useOnClickOutside } from "usehooks-ts"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible"
+import { cn } from "@/lib/utils"
+import { SlidersHorizontal, Pencil, TrashIcon as Trash3, Search, ChevronDown, ChevronUp } from "lucide-react"
+
+const MySwal = withReactContent(Swal)
 
 export default function Dashboard({
   dataFetch,
@@ -41,66 +47,66 @@ export default function Dashboard({
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
-  } = useForm();
-  const [isShowFilterSection, setIsShowFilterSection] = useState(false);
-  const [isOpenGenderInput, setIsOpenGenderInput] = useState<boolean>(false);
-  const [isOpenCountryInput, setIsOpenCountryInput] = useState<boolean>(false);
-  const [showModal, setShowModal] = useState(false);
-  const refGenderInput = useRef<HTMLElement>(null);
-  const refCountryInput = useRef<HTMLElement>(null);
+  } = useForm()
 
-  let positionSelected = Object.getOwnPropertyNames(
-    table.getState().rowSelection
-  );
-  const rowsSelected = table.getSelectedRowModel().rows;
+  const [isShowFilterSection, setIsShowFilterSection] = useState(false)
+  const [isOpenGenderInput, setIsOpenGenderInput] = useState<boolean>(false)
+  const [isOpenCountryInput, setIsOpenCountryInput] = useState<boolean>(false)
+  const [showModal, setShowModal] = useState(false)
+  const refGenderInput = useRef<HTMLDivElement>(null)
+  const refCountryInput = useRef<HTMLDivElement>(null)
+
+  const positionSelected = Object.getOwnPropertyNames(table.getState().rowSelection)
+  const rowsSelected = table.getSelectedRowModel().rows
+
+  // useOnClickOutside(refGenderInput, () => setIsOpenGenderInput(false))
+  // useOnClickOutside(refCountryInput, () => setIsOpenCountryInput(false))
 
   useEffect(() => {
-    reset();
-  }, [table.getState().rowSelection]);
+    reset()
+  }, [table.getState().rowSelection, reset])
 
   const handleCloseModal = () => {
-    setShowModal(false);
-    reset();
-  };
-  const handleShowModal = () => setShowModal(true);
+    setShowModal(false)
+    reset()
+  }
 
-  const handleChangeInputGender = (e: any) => {
-    const currentFilterGender = e.target.value;
-    setFilterGender(currentFilterGender);
+  const handleShowModal = () => setShowModal(true)
+
+  const handleChangeInputGender = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const currentFilterGender = e.target.value
+    setFilterGender(currentFilterGender)
 
     setShowResultFilterGender(
-      LIST_INPUT_GENDER.filter((gender: any) => {
+      LIST_INPUT_GENDER.filter((gender: string) => {
         if (filterGender === "") {
-          return gender;
-        } else {
           return gender
-            .toUpperCase()
-            .includes(currentFilterGender.toUpperCase());
+        } else {
+          return gender.toUpperCase().includes(currentFilterGender.toUpperCase())
         }
-      })
-    );
-  };
+      }),
+    )
+  }
 
-  const handleChangeInputCountry = (e: any) => {
-    const currentFilterCountry = e.target.value;
-    setFilterCountry(currentFilterCountry);
+  const handleChangeInputCountry = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const currentFilterCountry = e.target.value
+    setFilterCountry(currentFilterCountry)
 
     setShowResultFilterCountry(
-      LIST_INPUT_COUNTRY.filter((country: any) => {
+      LIST_INPUT_COUNTRY.filter((country: string) => {
         if (filterCountry === "") {
-          return country;
-        } else {
           return country
-            .toUpperCase()
-            .includes(currentFilterCountry.toUpperCase());
+        } else {
+          return country.toUpperCase().includes(currentFilterCountry.toUpperCase())
         }
-      })
-    );
-  };
+      }),
+    )
+  }
 
   const handleEditRowTable = () => {
-    const countRowsSelect = Object.keys(table.getState().rowSelection).length;
+    const countRowsSelect = Object.keys(table.getState().rowSelection).length
     if (countRowsSelect === 0) {
       MySwal.fire({
         toast: true,
@@ -109,7 +115,7 @@ export default function Dashboard({
         title: "Debes seleccionar una fila",
         showConfirmButton: false,
         timer: 1500,
-      });
+      })
     } else if (countRowsSelect > 1) {
       MySwal.fire({
         toast: true,
@@ -118,14 +124,24 @@ export default function Dashboard({
         title: "Seleccionaste más de una fila, selecciona solo una",
         showConfirmButton: false,
         timer: 1500,
-      });
+      })
     } else {
-      handleShowModal();
+      // Pre-fill form with selected row data
+      const selectedRow = rowsSelected[0]?.original
+      if (selectedRow) {
+        setValue("first", selectedRow.name?.first)
+        setValue("last", selectedRow.name?.last)
+        setValue("gender", selectedRow.gender)
+        setValue("email", selectedRow.email)
+        setValue("phone", selectedRow.phone)
+        setValue("nat", selectedRow.nat)
+      }
+      handleShowModal()
     }
-  };
+  }
 
   const handleDeleteRowsTable = () => {
-    const countRowsSelect = Object.keys(table.getState().rowSelection).length;
+    const countRowsSelect = Object.keys(table.getState().rowSelection).length
     if (countRowsSelect === 0) {
       MySwal.fire({
         toast: true,
@@ -134,7 +150,7 @@ export default function Dashboard({
         title: "Debes seleccionar almenos una fila.",
         showConfirmButton: false,
         timer: 1500,
-      });
+      })
     } else {
       MySwal.fire({
         title: "¿Estas seguro?",
@@ -146,27 +162,25 @@ export default function Dashboard({
         confirmButtonText: "¡Sí, eliminar!",
       }).then((result) => {
         if (result.isConfirmed) {
-          const newDataResults = dataFetch?.results?.filter(
-            (e: any, index: number) => {
-              if (!positionSelected.includes(String(index))) {
-                return e;
-              }
+          const newDataResults = dataFetch?.results?.filter((e: any, index: number) => {
+            if (!positionSelected.includes(String(index))) {
+              return e
             }
-          );
+          })
           setDataFetch((prev: any) => ({
             info: prev.info,
             results: newDataResults,
-          }));
-          table.resetRowSelection();
+          }))
+          table.resetRowSelection()
           Swal.fire({
             title: "¡Eliminado!",
             text: "La fila fue eliminada.",
             icon: "success",
-          });
+          })
         }
-      });
+      })
     }
-  };
+  }
 
   const onSubmit: SubmitHandler<any> = (data) => {
     const newDataResults = dataFetch?.results?.map((e: any, index: number) => {
@@ -182,300 +196,241 @@ export default function Dashboard({
           email: data.email,
           phone: data.phone,
           nat: data.nat,
-        };
+        }
       } else {
-        return e;
+        return e
       }
-    });
-    setDataFetch((prev: any) => ({ info: prev.info, results: newDataResults }));
-    setShowModal(false);
-    // reset();
-  };
+    })
+    setDataFetch((prev: any) => ({ info: prev.info, results: newDataResults }))
+    setShowModal(false)
+  }
 
   return (
     <>
-      <Col sm="12" md="6">
-        <div className="dt-title ">
-          <h2>Mi tabla</h2>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Mi tabla</h2>
         </div>
-      </Col>
 
-      <Col sm="12" md="6">
-        <div className="d-flex justify-content-end align-items-center">
-          <button
-            className="btn btn-sm btn-outline-primary px-4 me-2"
-            id="filtrosBtn"
-            onClick={() => {
-              setIsShowFilterSection(!isShowFilterSection);
-            }}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsShowFilterSection(!isShowFilterSection)}
+            className="flex items-center gap-2"
           >
-            <i className="bi bi-sliders"></i> Filtros
-          </button>
-          <button
-            className="btn btn-sm btn-outline-primary px-4 me-2"
+            <SlidersHorizontal className="h-4 w-4" />
+            Filtros
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleEditRowTable}
+            className="flex items-center gap-2 bg-transparent"
           >
-            <i className="bi bi-pencil"></i> Editar
-          </button>
-          <button
-            className="btn btn-sm btn-outline-danger px-4 me-2"
+            <Pencil className="h-4 w-4" />
+            Editar
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleDeleteRowsTable}
+            className="flex items-center gap-2 text-destructive hover:text-destructive bg-transparent"
           >
-            <i className="bi bi-trash3"></i> Eliminar
-          </button>
+            <Trash3 className="h-4 w-4" />
+            Eliminar
+          </Button>
         </div>
-      </Col>
+      </div>
 
-      {isShowFilterSection && (
-        <Col sm="12" className="mt-4 filtros-content">
-          <Card className="border-0 shadow-sm">
-            <Card.Body>
-              <Form className="row py-3">
-                <Form.Group className="form-group col-sm-12 col-lg-4">
-                  <div className="input-group">
-                    <div className="dropdown js-bs-select-dropdown">
-                      <a
-                        className={clsx(
-                          "btn btn-outline-secondary dropdown-toggle d-flex flex-nowrap align-items-center",
-                          {
-                            ["show"]: isOpenGenderInput,
-                          }
-                        )}
-                        onClick={() => {
-                          setIsOpenGenderInput(!isOpenGenderInput);
-                        }}
-                        role="button"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                        style={{ width: "auto" }}
-                      >
-                        <div className="js-dropdown-header flex-fill text-start">
-                          <span>{selectPrevGender}</span>
-                          <small className="text-muted mx-2"></small>
+      <Collapsible open={isShowFilterSection} onOpenChange={setIsShowFilterSection}>
+        <CollapsibleContent className="space-y-4">
+          <Card className="shadow-sm">
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-end">
+                {/* Gender Filter */}
+                <div className="space-y-2">
+                  <Label>Género</Label>
+                  <div className="relative" ref={refGenderInput}>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsOpenGenderInput(!isOpenGenderInput)}
+                      className="w-full justify-between"
+                    >
+                      {selectPrevGender}
+                      {isOpenGenderInput ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </Button>
+                    {isOpenGenderInput && (
+                      <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-popover border rounded-md shadow-md">
+                        <div className="p-2 border-b">
+                          <Input
+                            autoFocus
+                            value={filterGender}
+                            onChange={handleChangeInputGender}
+                            placeholder="Buscar..."
+                            className="h-8"
+                          />
                         </div>
-                      </a>
-                      {isOpenGenderInput && (
-                        <div
-                          className="dropdown-menu mt-1 show"
-                        >
-                          <div className="d-flex flex-column px-2 pb-2 border-bottom">
-                            <div className="d-flex justify-content-end align-items-center">
-                              <input
-                                autoFocus
-                                value={filterGender}
-                                onChange={handleChangeInputGender}
-                                type="search"
-                                className="form-control form-control-sm me-auto"
-                                placeholder="Buscar.."
-                              />
-                            </div>
-                          </div>
-                          <h6 className="dropdown-header text-uppercase text-start my-0 w-100 rounded-0 py-1 bg-secondary text-bg-secondary">
-                            GENERO
-                          </h6>
-                          {showResultFilterGender.map(
-                            (gender: any, index: number) => (
-                              <div
-                                key={gender}
-                                className=""
-                                onClick={() => {
-                                  setSelectPrevGender(gender);
-                                  setIsOpenGenderInput(false);
-                                }}
-                              >
-                                <a
-                                  className={clsx(
-                                    "dropdown-item d-flex align-items-end",
-                                    {
-                                      ["active"]: gender === selectPrevGender,
-                                    }
-                                  )}
-                                  data-index={index}
-                                >
-                                  <span className="ps-3">{gender}</span>
-                                </a>
-                              </div>
-                            )
-                          )}
+                        <div className="p-1 max-h-48 overflow-y-auto">
+                          <div className="px-2 py-1 text-xs font-medium text-muted-foreground uppercase">Género</div>
+                          {showResultFilterGender.map((gender: string) => (
+                            <button
+                              key={gender}
+                              className={cn(
+                                "w-full text-left px-2 py-1 text-sm hover:bg-accent rounded-sm",
+                                gender === selectPrevGender && "bg-accent",
+                              )}
+                              onClick={() => {
+                                setSelectPrevGender(gender)
+                                setIsOpenGenderInput(false)
+                              }}
+                            >
+                              {gender}
+                            </button>
+                          ))}
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
-                </Form.Group>
-                <Form.Group className="form-group col-sm-12 col-lg-4">
-                  <div className="input-group ">
-                    <div className="dropdown js-bs-select-dropdown ">
-                      <a
-                        className={clsx(
-                          "btn btn-outline-secondary dropdown-toggle d-flex flex-nowrap align-items-center",
-                          {
-                            ["show"]: isOpenCountryInput,
-                          }
-                        )}
-                        onClick={() => {
-                          setIsOpenCountryInput(!isOpenCountryInput);
-                        }}
-                        role="button"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                        style={{ width: "auto" }}
-                      >
-                        <div className="js-dropdown-header flex-fill text-start">
-                          <span>{selectPrevCountry}</span>
-                          <small className="text-muted mx-2"></small>
+                </div>
+
+                {/* Country Filter */}
+                <div className="space-y-2">
+                  <Label>Nacionalidad</Label>
+                  <div className="relative" ref={refCountryInput}>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsOpenCountryInput(!isOpenCountryInput)}
+                      className="w-full justify-between"
+                    >
+                      {selectPrevCountry}
+                      {isOpenCountryInput ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </Button>
+                    {isOpenCountryInput && (
+                      <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-popover border rounded-md shadow-md">
+                        <div className="p-2 border-b">
+                          <Input
+                            autoFocus
+                            value={filterCountry}
+                            onChange={handleChangeInputCountry}
+                            placeholder="Buscar..."
+                            className="h-8"
+                          />
                         </div>
-                      </a>
-                      {isOpenCountryInput && (
-                        <div
-                          className="dropdown-menu mt-1 show"
-                        >
-                          <div className="d-flex flex-column px-2 pb-2 border-bottom">
-                            <div className="d-flex  justify-content-end align-items-center">
-                              <input
-                                autoFocus
-                                value={filterCountry}
-                                onChange={handleChangeInputCountry}
-                                type="search"
-                                className="form-control form-control-sm me-auto"
-                                placeholder="Buscar.."
-                              />
-                            </div>
+                        <div className="p-1 max-h-48 overflow-y-auto">
+                          <div className="px-2 py-1 text-xs font-medium text-muted-foreground uppercase">
+                            Nacionalidad
                           </div>
-                          <h6 className="dropdown-header text-uppercase text-start my-0 w-100 rounded-0 py-1 bg-secondary text-bg-secondary">
-                            NACIONALIDAD
-                          </h6>
-                          {showResultFilterCountry.map(
-                            (country: any, index: number) => (
-                              <div
-                                key={country}
-                                className=""
-                                onClick={() => {
-                                  setSelectPrevCountry(country);
-                                  setIsOpenCountryInput(false);
-                                }}
-                              >
-                                <a
-                                  className={clsx(
-                                    "dropdown-item d-flex align-items-end",
-                                    {
-                                      ["active"]: country === selectPrevCountry,
-                                    }
-                                  )}
-                                  data-index={index}
-                                >
-                                  <span className="ps-3">{country}</span>
-                                </a>
-                              </div>
-                            )
-                          )}
+                          {showResultFilterCountry.map((country: string) => (
+                            <button
+                              key={country}
+                              className={cn(
+                                "w-full text-left px-2 py-1 text-sm hover:bg-accent rounded-sm",
+                                country === selectPrevCountry && "bg-accent",
+                              )}
+                              onClick={() => {
+                                setSelectPrevCountry(country)
+                                setIsOpenCountryInput(false)
+                              }}
+                            >
+                              {country}
+                            </button>
+                          ))}
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
-                </Form.Group>
-                <div className="col-sm-12 col-lg-4">
-                  <button
-                    className="btn btn-sm btn-primary px-4 rounded-3 btn-search"
+                </div>
+
+                {/* Search Button */}
+                <div className="lg:col-span-2">
+                  <Button
                     onClick={(e) => {
-                      e.preventDefault();
-                      setSelectGender(selectPrevGender);
-                      setSelectCountry(selectPrevCountry);
+                      e.preventDefault()
+                      setSelectGender(selectPrevGender)
+                      setSelectCountry(selectPrevCountry)
                       getFetching({
                         gender: selectPrevGender,
                         country: selectPrevCountry,
-                      });
-                      setGlobalFilter("");
-                      table.resetPageIndex(true);
-                      table.resetRowSelection();
+                      })
+                      setGlobalFilter("")
+                      table.resetPageIndex(true)
+                      table.resetRowSelection()
                     }}
+                    className="flex items-center gap-2"
                   >
-                    <i className="bi bi-search me-2"></i> Buscar
-                  </button>
+                    <Search className="h-4 w-4" />
+                    Buscar
+                  </Button>
                 </div>
-              </Form>
-            </Card.Body>
+              </div>
+            </CardContent>
           </Card>
-        </Col>
-      )}
+        </CollapsibleContent>
+      </Collapsible>
 
-      <Modal show={showModal} onHide={handleCloseModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Editar</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form onSubmit={handleSubmit(onSubmit)}>
-            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-              <Form.Label>Nombre</Form.Label>
-              <Form.Control
-                type="text"
-                defaultValue={rowsSelected[0]?.original.name?.first}
-                {...register("first", { required: true })}
-                autoFocus
-              />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-              <Form.Label>Apellido</Form.Label>
-              <Form.Control
-                type="text"
-                defaultValue={rowsSelected[0]?.original.name.last}
-                {...register("last", { required: true })}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-              <Form.Label>Genero</Form.Label>
-              <Form.Select
-                aria-label="genero"
-                defaultValue={rowsSelected[0]?.original.gender}
-                {...register("gender", { required: true })}
-              >
-                {LIST_INPUT_GENDER.map((gender: any) => (
-                  <option key={gender} value={gender.toLowerCase()}>
-                    {gender}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-              <Form.Label>Correo electronico</Form.Label>
-              <Form.Control
-                type="email"
-                defaultValue={rowsSelected[0]?.original.email}
-                {...register("email", { required: true })}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-              <Form.Label>Celular</Form.Label>
-              <Form.Control
-                type="text"
-                defaultValue={rowsSelected[0]?.original.phone}
-                {...register("phone", { required: true })}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-              <Form.Label>Nacionalidad</Form.Label>
-              <Form.Select
-                aria-label="nacionalidad"
-                defaultValue={rowsSelected[0]?.original.nat}
-                {...register("nat", { required: true })}
-              >
-                {LIST_INPUT_COUNTRY.map((country: any) => (
-                  <option key={country} value={country.toUpperCase()}>
-                    {country}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleCloseModal}>
+      {/* Edit Modal */}
+      <Dialog open={showModal} onOpenChange={setShowModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Editar</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="first">Nombre</Label>
+              <Input id="first" {...register("first", { required: true })} autoFocus />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="last">Apellido</Label>
+              <Input id="last" {...register("last", { required: true })} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="gender">Género</Label>
+              <Select onValueChange={(value) => setValue("gender", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar género" />
+                </SelectTrigger>
+                <SelectContent>
+                  {LIST_INPUT_GENDER.map((gender: string) => (
+                    <SelectItem key={gender} value={gender.toLowerCase()}>
+                      {gender}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Correo electrónico</Label>
+              <Input id="email" type="email" {...register("email", { required: true })} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Celular</Label>
+              <Input id="phone" {...register("phone", { required: true })} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="nat">Nacionalidad</Label>
+              <Select onValueChange={(value) => setValue("nat", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar nacionalidad" />
+                </SelectTrigger>
+                <SelectContent>
+                  {LIST_INPUT_COUNTRY.map((country: string) => (
+                    <SelectItem key={country} value={country.toUpperCase()}>
+                      {country}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="secondary" onClick={handleCloseModal}>
                 Cerrar
               </Button>
-              <Button variant="primary" type="submit">
-                Guardar
-              </Button>
-            </Modal.Footer>
-          </Form>
-        </Modal.Body>
-      </Modal>
+              <Button type="submit">Guardar</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
-  );
+  )
 }

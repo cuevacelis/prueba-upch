@@ -1,69 +1,58 @@
-"use client";
+"use client"
+
 import {
-  ColumnDef,
-  PaginationState,
-  SortingState,
+  type ColumnDef,
+  type PaginationState,
+  type SortingState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-} from "@tanstack/react-table";
-import clsx from "clsx";
-import { useEffect, useMemo, useState } from "react";
-import { Spinner } from "react-bootstrap";
-import Col from "react-bootstrap/Col";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Table from "react-bootstrap/Table";
-import { LIST_INPUT_COUNTRY } from "../../lib/listInputCountry";
-import { LIST_INPUT_GENDER } from "../../lib/listInputGender";
-import { Person, PersonFetch } from "../../types/personType";
-import Dashboard from "./components/dashboard/dashboard";
-import Pagination from "./components/pagination/pagination";
-import Search from "./components/search/search";
+} from "@tanstack/react-table"
+import { useEffect, useMemo, useState } from "react"
+import { Loader2, ChevronUp, ChevronDown } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { LIST_INPUT_COUNTRY } from "../../lib/listInputCountry"
+import { LIST_INPUT_GENDER } from "../../lib/listInputGender"
+import type { Person, PersonFetch } from "../../types/personType"
+import Dashboard from "./components/dashboard/dashboard"
+import Pagination from "./components/pagination/pagination"
+import Search from "./components/search/search"
 
 export default function MyTable() {
-  const [dataFetch, setDataFetch] = useState<PersonFetch>({});
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [rowSelection, setRowSelection] = useState({});
-  const [globalFilter, setGlobalFilter] = useState<string>("");
-  const [filterGender, setFilterGender] = useState<string>("");
-  const [filterCountry, setFilterCountry] = useState<string>("");
-  const [showResultFilterGender, setShowResultFilterGender] =
-    useState(LIST_INPUT_GENDER);
-  const [showResultFilterCountry, setShowResultFilterCountry] =
-    useState(LIST_INPUT_COUNTRY);
-  const [selectPrevGender, setSelectPrevGender] =
-    useState<(typeof showResultFilterGender)[0]>("FEMALE");
-  const [selectPrevCountry, setSelectPrevCountry] =
-    useState<(typeof showResultFilterCountry)[0]>("US");
-  const [selectGender, setSelectGender] =
-    useState<(typeof showResultFilterGender)[0]>("FEMALE");
-  const [selectCountry, setSelectCountry] =
-    useState<(typeof showResultFilterCountry)[0]>("US");
+  const [dataFetch, setDataFetch] = useState<PersonFetch>({})
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [rowSelection, setRowSelection] = useState({})
+  const [globalFilter, setGlobalFilter] = useState<string>("")
+  const [filterGender, setFilterGender] = useState<string>("")
+  const [filterCountry, setFilterCountry] = useState<string>("")
+  const [showResultFilterGender, setShowResultFilterGender] = useState(LIST_INPUT_GENDER)
+  const [showResultFilterCountry, setShowResultFilterCountry] = useState(LIST_INPUT_COUNTRY)
+  const [selectPrevGender, setSelectPrevGender] = useState<(typeof showResultFilterGender)[0]>("FEMALE")
+  const [selectPrevCountry, setSelectPrevCountry] = useState<(typeof showResultFilterCountry)[0]>("US")
+  const [selectGender, setSelectGender] = useState<(typeof showResultFilterGender)[0]>("FEMALE")
+  const [selectCountry, setSelectCountry] = useState<(typeof showResultFilterCountry)[0]>("US")
   const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
-  });
+  })
 
   const pagination = useMemo(
     () => ({
       pageIndex,
       pageSize,
     }),
-    [pageIndex, pageSize]
-  );
+    [pageIndex, pageSize],
+  )
 
-  const getFetching = async ({
-    gender = selectGender,
-    country = selectCountry,
-    page = pagination.pageIndex,
-  }) => {
+  const getFetching = async ({ gender = selectGender, country = selectCountry, page = pagination.pageIndex }) => {
     try {
-      setIsLoading(true);
+      setIsLoading(true)
       const responseDataFetch = await fetch(
         `https://randomuser.me/api?results=10&gender=${gender.toLowerCase()}&nat=${country}&page=${page}`,
         {
@@ -72,19 +61,19 @@ export default function MyTable() {
           headers: {
             "Content-Type": "application/json",
           },
-        }
-      );
+        },
+      )
       if (!responseDataFetch.ok) {
-        throw "Respuesta de red OK pero respuesta HTTP no OK";
+        throw "Respuesta de red OK pero respuesta HTTP no OK"
       }
-      const dataJson = await responseDataFetch.json();
-      setDataFetch(dataJson);
-      setIsLoading(false);
+      const dataJson = await responseDataFetch.json()
+      setDataFetch(dataJson)
+      setIsLoading(false)
     } catch (error) {
-      setIsLoading(false);
-      console.error(error);
+      setIsLoading(false)
+      console.error(error)
     }
-  };
+  }
 
   const columns = useMemo<ColumnDef<Person>[]>(
     () => [
@@ -92,25 +81,18 @@ export default function MyTable() {
         id: "select",
         accessorKey: "",
         header: ({ table }) => (
-          <input
-            className="form-check-input"
-            type="checkbox"
-            {...{
-              checked: table.getIsAllRowsSelected(),
-              onChange: table.getToggleAllRowsSelectedHandler(),
-            }}
+          <Checkbox
+            checked={table.getIsAllRowsSelected()}
+            onCheckedChange={(value) => table.toggleAllRowsSelected(!!value)}
+            aria-label="Seleccionar todas las filas"
           />
         ),
         cell: ({ row }) => (
-          <input
-            className="form-check-input"
-            type="checkbox"
-            value=""
-            {...{
-              checked: row.getIsSelected(),
-              disabled: !row.getCanSelect(),
-              onChange: row.getToggleSelectedHandler(),
-            }}
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            disabled={!row.getCanSelect()}
+            aria-label="Seleccionar fila"
           />
         ),
         footer: (props) => props.column.id,
@@ -125,15 +107,15 @@ export default function MyTable() {
       {
         id: "gender",
         accessorKey: "gender",
-        header: "Genero",
-        cell: (info) => info.getValue(),
+        header: "Género",
+        cell: (info) => <span className="capitalize">{info.getValue() as string}</span>,
         footer: (props) => props.column.id,
       },
       {
         id: "email",
         accessorKey: "email",
         header: "Correo electrónico",
-        cell: (info) => info.getValue(),
+        cell: (info) => <span className="text-blue-600 hover:text-blue-800">{info.getValue() as string}</span>,
         footer: (props) => props.column.id,
       },
       {
@@ -147,12 +129,12 @@ export default function MyTable() {
         id: "nacionality",
         accessorKey: "nat",
         header: "Nacionalidad",
-        cell: (info) => info.getValue(),
+        cell: (info) => <span className="uppercase font-medium">{info.getValue() as string}</span>,
         footer: (props) => props.column.id,
       },
     ],
-    []
-  );
+    [],
+  )
 
   const table = useReactTable({
     data: dataFetch?.results ?? [],
@@ -170,11 +152,11 @@ export default function MyTable() {
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onPaginationChange: (updater) => {
-      if (typeof updater !== "function") return;
-      const newPageInfo = updater(table.getState().pagination);
-      setPagination(updater);
-      getFetching({ page: newPageInfo.pageIndex + 1 });
-      setGlobalFilter("");
+      if (typeof updater !== "function") return
+      const newPageInfo = updater(table.getState().pagination)
+      setPagination(updater)
+      getFetching({ page: newPageInfo.pageIndex + 1 })
+      setGlobalFilter("")
     },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -182,15 +164,15 @@ export default function MyTable() {
     getPaginationRowModel: getPaginationRowModel(),
     manualPagination: true,
     debugTable: false,
-  });
+  })
 
   useEffect(function getFirstFetching() {
-    getFetching({ page: 1 });
-  }, []);
+    getFetching({ page: 1 })
+  }, [])
 
   return (
-    <Container className="pt-5">
-      <Row>
+    <div className="container mx-auto px-4 pt-8">
+      <div className="space-y-6">
         <Dashboard
           {...{
             dataFetch,
@@ -214,95 +196,82 @@ export default function MyTable() {
             setShowResultFilterCountry,
           }}
         />
-        <div className="dt-example">
-          <div
-            id="example_wrapper"
-            className="dataTables_wrapper dt-bootstrap5 no-footer"
-          >
-            <Search
-              value={globalFilter ?? ""}
-              onChange={(value) => setGlobalFilter(String(value))}
-            />
-            <Row className="dt-row">
-              <Col sm="12">
-                {isLoading ? (
-                  <div
-                    className="text-center"
-                    style={{ marginTop: "50px", overflowY: "hidden" }}
-                  >
-                    <Spinner animation="border" role="status">
-                      <span className="visually-hidden">Loading...</span>
-                    </Spinner>
-                  </div>
-                ) : (
-                  <Table
-                    responsive
-                    hover
-                    className="table-light dataTable no-footer"
-                  >
-                    <thead>
-                      {table.getHeaderGroups().map((headerGroup) => (
-                        <tr key={headerGroup.id}>
-                          {headerGroup.headers.map((header) => {
-                            return (
-                              <th
-                                key={header.id}
-                                colSpan={header.colSpan}
-                                tabIndex={0}
-                                scope="col"
-                                className={clsx("sorting", {
-                                  ["sorting_asc"]:
-                                    header.column.getIsSorted() === "asc",
-                                  ["sorting_desc"]:
-                                    header.column.getIsSorted() === "desc",
-                                })}
-                                aria-controls="example"
-                                rowSpan={1}
-                                onClick={header.column.getToggleSortingHandler()}
-                              >
-                                {header.isPlaceholder ? null : (
-                                  <span>
-                                    {flexRender(
-                                      header.column.columnDef.header,
-                                      header.getContext()
-                                    )}
-                                  </span>
+
+        <div className="space-y-4">
+          <Search value={globalFilter ?? ""} onChange={(value) => setGlobalFilter(String(value))} />
+
+          <div className="rounded-md border">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="flex items-center space-x-2">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <span className="text-sm text-muted-foreground">Cargando...</span>
+                </div>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => {
+                        const canSort = header.column.getCanSort()
+                        const sortDirection = header.column.getIsSorted()
+
+                        return (
+                          <TableHead
+                            key={header.id}
+                            colSpan={header.colSpan}
+                            className={cn("select-none", canSort && "cursor-pointer hover:bg-muted/50")}
+                            onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
+                          >
+                            {header.isPlaceholder ? null : (
+                              <div className="flex items-center space-x-2">
+                                <span>{flexRender(header.column.columnDef.header, header.getContext())}</span>
+                                {canSort && (
+                                  <div className="flex flex-col">
+                                    <ChevronUp
+                                      className={cn(
+                                        "h-3 w-3",
+                                        sortDirection === "asc" ? "text-foreground" : "text-muted-foreground",
+                                      )}
+                                    />
+                                    <ChevronDown
+                                      className={cn(
+                                        "h-3 w-3 -mt-1",
+                                        sortDirection === "desc" ? "text-foreground" : "text-muted-foreground",
+                                      )}
+                                    />
+                                  </div>
                                 )}
-                              </th>
-                            );
-                          })}
-                        </tr>
-                      ))}
-                    </thead>
-                    <tbody>
-                      {table
-                        .getRowModel()
-                        .rows.slice(0, 10)
-                        .map((row) => {
-                          return (
-                            <tr key={row.id}>
-                              {row.getVisibleCells().map((cell) => {
-                                return (
-                                  <td key={cell.id}>
-                                    {flexRender(
-                                      cell.column.columnDef.cell,
-                                      cell.getContext()
-                                    )}
-                                  </td>
-                                );
-                              })}
-                            </tr>
-                          );
-                        })}
-                    </tbody>
-                  </Table>
-                )}
-              </Col>
-            </Row>
-            <Pagination table={table} />
+                              </div>
+                            )}
+                          </TableHead>
+                        )
+                      })}
+                    </TableRow>
+                  ))}
+                </TableHeader>
+                <TableBody>
+                  {table
+                    .getRowModel()
+                    .rows.slice(0, 10)
+                    .map((row) => (
+                      <TableRow key={row.id} className={cn("hover:bg-muted/50", row.getIsSelected() && "bg-muted")}>
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            )}
           </div>
+
+          <Pagination table={table} />
         </div>
-      </Row>
-    </Container>
-  );
+      </div>
+    </div>
+  )
 }
